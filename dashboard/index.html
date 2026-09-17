@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeScript — Medical Report OCR and Drug Interaction Checker</title>
+<style>
+  :root {
+    --ink: #023436;
+    --teal: #028090;
+    --seafoam: #00A896;
+    --mint: #02C39A;
+    --card: #FFFFFF;
+    --line: #E1EBE9;
+    --text: #17302E;
+    --muted: #5C7371;
+    --neutral-bg: #F3F7F6;
+    --danger: #B23A3A;
+    --danger-bg: #FDEDEC;
+    --warn: #C97A1E;
+    --warn-bg: #FDF6EC;
+    --clear-bg: #E3F7F1;
+    --clear-text: #04795F;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+  }
+
+  .page-bg {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--teal), var(--mint));
+    padding: 36px 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .app-shell {
+    background: var(--card);
+    width: 100%;
+    max-width: 1180px;
+    border-radius: 24px;
+    box-shadow: 0 30px 70px rgba(2, 52, 54, 0.28);
+    padding: 26px 30px 36px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: #FFFFFF;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .brand-word {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--ink);
+  }
+
+  .nav-pills {
+    display: flex;
+    gap: 4px;
+    background: var(--neutral-bg);
+    padding: 4px;
+    border-radius: 999px;
+  }
+
+  .nav-pills a {
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-pills a.active {
+    background: var(--ink);
+    color: #FFFFFF;
+  }
+
+  #resetBtn {
+    border: 1px solid var(--line);
+    background: #FFFFFF;
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  #resetBtn:hover { background: var(--neutral-bg); }
+
+  .upload-bar {
+    background: var(--neutral-bg);
+    border-radius: 16px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+  }
+
+  .upload-bar label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-right: 10px;
+  }
+
+  input[type="file"] { font-size: 13px; color: var(--muted); }
+
+  .upload-bar .spacer { flex: 1; min-width: 12px; }
+
+  button#runBtn {
+    background: var(--teal);
+    color: #FFFFFF;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  button#runBtn:hover:not(:disabled) { background: #026873; }
+  button#runBtn:disabled { background: #9FB8B6; cursor: not-allowed; }
+
+  .scope-note {
+    width: 100%;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 70px 20px;
+    color: var(--muted);
+    border: 1.5px dashed var(--line);
+    border-radius: 16px;
+    font-size: 14px;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 780px) {
+    .results-grid { grid-template-columns: 1fr; }
+    .stat-tiles, .bottom-tiles { grid-template-columns: 1fr !important; }
+  }
+
+  .drug-list-panel {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    align-self: start;
+  }
+
+  .drug-list-panel h2 {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 2px 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .count-badge {
+    background: var(--seafoam);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+  }
+
+  .drug-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+
+  .drug-row:hover { background: var(--neutral-bg); }
+  .drug-row.active { background: var(--neutral-bg); }
+
+  .avatar-bubble {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--seafoam);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .row-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .row-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .tag-clear { background: var(--clear-bg); color: var(--clear-text); }
+  .tag-interacts { background: var(--danger-bg); color: var(--danger); }
+
+  .empty-note { font-size: 12.5px; color: var(--muted); padding: 6px; }
+
+  .detail-col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .hero-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 210px;
+    background: var(--neutral-bg);
+  }
+
+  .hero-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 14px 18px;
+    background: linear-gradient(to top, rgba(2,52,54,0.88), transparent);
+    color: #FFFFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hero-filename { font-size: 13px; font-weight: 600; }
+  .hero-sub { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+
+  .hero-actions button {
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.45);
+    color: #FFFFFF;
+    padding: 6px 13px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+
+  .hero-actions button:hover { background: rgba(255,255,255,0.3); }
+
+  .stat-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .stat-tile {
+    background: var(--neutral-bg);
+    border-radius: 14px;
+    padding: 15px 16px;
+  }
+
+  .stat-value { font-size: 21px; font-weight: 700; color: var(--ink); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .summary-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+
+  .summary-card h2, .drug-detail-card h2 {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 10px;
+  }
+
+  #summaryText {
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .bottom-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .risk-tile, .count-tile {
+    border-radius: 16px;
+    padding: 18px 20px;
+    color: #FFFFFF;
+  }
+
+  .risk-tile.risk-none { background: var(--seafoam); }
+  .risk-tile.risk-minor { background: var(--muted); }
+  .risk-tile.risk-moderate { background: var(--warn); }
+  .risk-tile.risk-major { background: var(--danger); }
+  .count-tile { background: var(--teal); }
+
+  .tile-label { font-size: 11px; opacity: 0.85; }
+  .tile-value { font-size: 25px; font-weight: 700; margin-top: 4px; }
+
+  .drug-detail-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+
+  #drugDetailPurpose {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+
+  .detail-interaction {
+    padding: 10px 12px;
+    border-left: 3px solid var(--danger);
+    background: var(--danger-bg);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+  }
+
+  .detail-interaction.moderate { border-left-color: var(--warn); background: var(--warn-bg); }
+  .detail-interaction.minor { border-left-color: var(--muted); background: var(--neutral-bg); }
+  .detail-interaction strong { display: block; color: var(--ink); margin-bottom: 2px; }
+
+  .info-section {
+    padding: 26px 4px 0;
+    margin-top: 30px;
+    border-top: 1px solid var(--line);
+  }
+
+  .info-section h3 {
+    font-size: 15px;
+    color: var(--ink);
+    margin: 0 0 8px;
+  }
+
+  .info-section p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 760px;
+  }
+
+  .disclaimer-section p { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="page-bg">
+  <div class="app-shell">
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">S</div>
+        <div class="brand-word">SafeScript</div>
+      </div>
+      <nav class="nav-pills">
+        <a href="#top" class="active">Check report</a>
+        <a href="#how">How it works</a>
+        <a href="#about">About</a>
+      </nav>
+      <button id="resetBtn">New check</button>
+    </header>
+
+    <section class="upload-bar" id="top">
+      <div>
+        <label for="reportImage">Report image</label>
+        <input type="file" id="reportImage" accept="image/*">
+      </div>
+      <div class="spacer"></div>
+      <button id="runBtn">Check this report</button>
+      <div class="scope-note">Works best with printed lab reports, pharmacy printouts, or typed prescriptions. Handwriting recognition is not supported.</div>
+    </section>
+
+    <script>
+      // GATEWAY_URL must be updated once the gateway service is deployed
+      // on Render. This is the ONLY URL the dashboard needs to know about
+      // -- the gateway handles calling the other services internally.
+      const GATEWAY_URL = "http://localhost:5004/api/v1/process-report";
+    </script>
+
+    <div id="emptyState" class="empty-state">
+      Upload a report above to see the medicines identified, what each one is for, and any interaction warnings.
+    </div>
+
+    <div id="resultsGrid" class="results-grid" style="display:none;">
+      <aside class="drug-list-panel">
+        <h2>Medicines identified <span class="count-badge" id="drugCount">0</span></h2>
+        <div id="drugRows"></div>
+      </aside>
+
+      <div class="detail-col">
+        <div class="hero-card">
+          <img id="heroImage" src="" alt="Uploaded report">
+          <div class="hero-overlay">
+            <div>
+              <div class="hero-filename" id="heroFileName"></div>
+              <div class="hero-sub">Processed just now</div>
+            </div>
+            <div class="hero-actions">
+              <button id="openImageBtn">View full size</button>
+              <button id="copySummaryBtn">Copy summary</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-tiles" id="statTiles"></div>
+
+        <div class="summary-card">
+          <h2>Summary</h2>
+          <pre id="summaryText"></pre>
+        </div>
+
+        <div class="bottom-tiles">
+          <div class="risk-tile risk-none" id="riskTile">
+            <div class="tile-label">Overall risk</div>
+            <div class="tile-value" id="riskValue">—</div>
+          </div>
+          <div class="count-tile">
+            <div class="tile-label">Interactions found</div>
+            <div class="tile-value" id="interactionCountValue">0</div>
+          </div>
+        </div>
+
+        <div class="drug-detail-card">
+          <h2 id="drugDetailName">Select a medicine</h2>
+          <p id="drugDetailPurpose"></p>
+          <div id="drugDetailInteractions"></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="how" class="info-section">
+      <h3>How this works</h3>
+      <p>Your uploaded report is read by an OCR service, matched against known drug names, checked against a drug interaction database, and turned into a plain-language summary — each step running as its own cloud service.</p>
+    </section>
+
+    <section id="about" class="info-section disclaimer-section">
+      <p>This tool is for informational purposes only and is not a substitute for professional medical advice. Always consult a qualified doctor or pharmacist.</p>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  const reportImage = document.getElementById("reportImage");
+  const runBtn = document.getElementById("runBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const emptyState = document.getElementById("emptyState");
+  const resultsGrid = document.getElementById("resultsGrid");
+  const drugRows = document.getElementById("drugRows");
+  const drugCount = document.getElementById("drugCount");
+  const heroImage = document.getElementById("heroImage");
+  const heroFileName = document.getElementById("heroFileName");
+  const openImageBtn = document.getElementById("openImageBtn");
+  const copySummaryBtn = document.getElementById("copySummaryBtn");
+  const statTiles = document.getElementById("statTiles");
+  const summaryText = document.getElementById("summaryText");
+  const riskTile = document.getElementById("riskTile");
+  const riskValue = document.getElementById("riskValue");
+  const interactionCountValue = document.getElementById("interactionCountValue");
+  const drugDetailName = document.getElementById("drugDetailName");
+  const drugDetailPurpose = document.getElementById("drugDetailPurpose");
+  const drugDetailInteractions = document.getElementById("drugDetailInteractions");
+
+  const SEVERITY_RANK = { major: 3, moderate: 2, minor: 1 };
+
+  let lastData = null;
+
+  runBtn.addEventListener("click", async () => {
+    const file = reportImage.files[0];
+    if (!file) {
+      alert("Choose a report image first.");
+      return;
+    }
+
+    runBtn.disabled = true;
+    runBtn.textContent = "Checking...";
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch(GATEWAY_URL, { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (data.error) {
+        alert("Something went wrong: " + data.error);
+        return;
+      }
+
+      lastData = data;
+      renderResults(data, file);
+    } catch (err) {
+      alert("Request failed. Check that GATEWAY_URL is correct and the service is running.");
+    } finally {
+      runBtn.disabled = false;
+      runBtn.textContent = "Check this report";
+    }
+  });
+
+  resetBtn.addEventListener("click", () => {
+    reportImage.value = "";
+    lastData = null;
+    resultsGrid.style.display = "none";
+    emptyState.style.display = "block";
+  });
+
+  function worstSeverityFor(drugName, interactions) {
+    let worst = null;
+    interactions.forEach((item) => {
+      if (item.pair.includes(drugName)) {
+        if (!worst || (SEVERITY_RANK[item.severity] || 0) > (SEVERITY_RANK[worst] || 0)) {
+          worst = item.severity;
+        }
+      }
+    });
+    return worst;
+  }
+
+  function selectDrug(index, data) {
+    const drugs = data.matched_drugs || [];
+    const interactions = data.interactions || [];
+    const drug = drugs[index];
+
+    document.querySelectorAll(".drug-row").forEach((el, i) => {
+      el.classList.toggle("active", i === index);
+    });
+
+    if (!drug) {
+      drugDetailName.textContent = "No medicine selected";
+      drugDetailPurpose.textContent = "";
+      drugDetailInteractions.innerHTML = "";
+      return;
+    }
+
+    drugDetailName.textContent = drug;
+    drugDetailPurpose.textContent = (data.drug_info && data.drug_info[drug]) || "No description available.";
+
+    const related = interactions.filter((item) => item.pair.includes(drug));
+    drugDetailInteractions.innerHTML = "";
+    if (related.length === 0) {
+      drugDetailInteractions.innerHTML = '<p class="empty-note">No known interactions involving this medicine.</p>';
+    } else {
+      related.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "detail-interaction " + (item.severity || "");
+        div.innerHTML = `<strong>${item.pair.join(" + ")} (${item.severity})</strong>${item.description}`;
+        drugDetailInteractions.appendChild(div);
+      });
+    }
+  }
+
+  function renderResults(data, file) {
+    emptyState.style.display = "none";
+    resultsGrid.style.display = "grid";
+
+    const objectUrl = URL.createObjectURL(file);
+    heroImage.src = objectUrl;
+    heroFileName.textContent = file.name;
+
+    openImageBtn.onclick = () => window.open(objectUrl, "_blank");
+    copySummaryBtn.onclick = () => {
+      navigator.clipboard.writeText(data.summary || "").then(
+        () => { copySummaryBtn.textContent = "Copied!"; setTimeout(() => (copySummaryBtn.textContent = "Copy summary"), 1500); },
+        () => alert("Could not copy to clipboard.")
+      );
+    };
+
+    const drugs = data.matched_drugs || [];
+    const interactions = data.interactions || [];
+    drugCount.textContent = drugs.length;
+    drugRows.innerHTML = "";
+
+    if (drugs.length === 0) {
+      drugRows.innerHTML = '<p class="empty-note">No medicines could be confidently identified in this report.</p>';
+    } else {
+      drugs.forEach((drug, index) => {
+        const worst = worstSeverityFor(drug, interactions);
+        const row = document.createElement("div");
+        row.className = "drug-row";
+        row.innerHTML = `
+          <div class="avatar-bubble">${drug.charAt(0).toUpperCase()}</div>
+          <div class="row-name">${drug}</div>
+          <div class="row-tag ${worst ? "tag-interacts" : "tag-clear"}">${worst ? "Interacts" : "Clear"}</div>
+        `;
+        row.addEventListener("click", () => selectDrug(index, data));
+        drugRows.appendChild(row);
+      });
+    }
+
+    statTiles.innerHTML = "";
+    const t = data.stage_timings_ms || {};
+    const tileDefs = [
+      ["OCR", t.ocr],
+      ["Drug matching", t.matching],
+      ["Drug info lookup", t.drug_info],
+      ["Interaction check", t.interaction_check],
+    ];
+    tileDefs.forEach(([label, value]) => {
+      const tile = document.createElement("div");
+      tile.className = "stat-tile";
+      tile.innerHTML = `<div class="stat-value">${value != null ? value + " ms" : "—"}</div><div class="stat-label">${label}</div>`;
+      statTiles.appendChild(tile);
+    });
+
+    summaryText.textContent = data.summary || "";
+
+    interactionCountValue.textContent = interactions.length;
+    let worstOverall = null;
+    interactions.forEach((item) => {
+      if (!worstOverall || (SEVERITY_RANK[item.severity] || 0) > (SEVERITY_RANK[worstOverall] || 0)) {
+        worstOverall = item.severity;
+      }
+    });
+    riskTile.className = "risk-tile " + (worstOverall ? "risk-" + worstOverall : "risk-none");
+    riskValue.textContent = worstOverall ? worstOverall.charAt(0).toUpperCase() + worstOverall.slice(1) : "None found";
+
+    selectDrug(0, data);
+  }
+</script>
+
+</body>
+</html>

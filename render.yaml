@@ -1,0 +1,65 @@
+services:
+  - type: web
+    name: safescript-ocr
+    env: docker
+    plan: free
+    rootDir: ocr-service
+
+  - type: web
+    name: safescript-matching
+    env: docker
+    plan: free
+    rootDir: matching-service
+
+  - type: web
+    name: safescript-interaction
+    env: docker
+    plan: free
+    rootDir: interaction-service
+
+  - type: web
+    name: safescript-summary
+    env: docker
+    plan: free
+    rootDir: summary-service
+
+  - type: web
+    name: safescript-drug-info
+    env: docker
+    plan: free
+    rootDir: drug-info-service
+
+  # The gateway is the single entry point the dashboard calls. Its
+  # environment variables are automatically linked to the other
+  # services' hostnames via `fromService`, so you never hardcode URLs.
+  - type: web
+    name: safescript-gateway
+    env: docker
+    plan: free
+    rootDir: gateway-service
+    envVars:
+      - key: OCR_HOST
+        fromService:
+          name: safescript-ocr
+          type: web
+          property: host
+      - key: MATCHING_HOST
+        fromService:
+          name: safescript-matching
+          type: web
+          property: host
+      - key: INTERACTION_HOST
+        fromService:
+          name: safescript-interaction
+          type: web
+          property: host
+      - key: SUMMARY_HOST
+        fromService:
+          name: safescript-summary
+          type: web
+          property: host
+      - key: DRUG_INFO_HOST
+        fromService:
+          name: safescript-drug-info
+          type: web
+          property: host

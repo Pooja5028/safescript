@@ -1,0 +1,6 @@
+drug_a,drug_b,severity,description
+Warfarin,Aspirin,major,Increased risk of bleeding when taken together.
+Simvastatin,Azithromycin,moderate,May increase risk of muscle-related side effects.
+Metformin,Ciprofloxacin,moderate,May affect blood sugar control.
+Ibuprofen,Losartan,moderate,May reduce the blood-pressure-lowering effect of Losartan.
+Omeprazole,Atorvastatin,minor,Minor effect on Atorvastatin metabolism.
