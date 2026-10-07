@@ -2,22 +2,26 @@
 Interaction Check Service
 --------------------------
 Takes a list of drug names and returns any known interactions
-between them, using a local interaction dataset.
+between them, using the full DDInter dataset (merged via
+build_interactions.py into interactions.csv).
+
+DDInter names drugs by their generic/chemical name, which doesn't
+always match the common name a prescription or OCR pass produces
+(e.g. "Aspirin" vs DDInter's "Acetylsalicylic acid"). NAME_ALIASES
+below maps known common-name mismatches to DDInter's actual name.
+If a pair you expect to match still comes back empty, grep
+interactions.csv for one of the two drug names to find what DDInter
+actually calls it, then add an entry here.
 
 Endpoint: POST /check  { "drugs": ["Warfarin", "Aspirin"] }
 Response: { "interactions": [
     {"pair": ["Warfarin", "Aspirin"], "severity": "major",
-     "description": "Increased risk of bleeding."}
+     "description": "..."}
 ] }
-
-NOTE FOR THE TEAM:
-interactions.csv below is a small starter dataset for demo purposes.
-Before your real submission, replace it with data exported from
-DDInter 2.0 (https://ddinter2.scbdd.com/) — it's free to download,
-no account required, and far more complete than this starter file.
 """
 
 from flask import Flask, request, jsonify
+from itertools import combinations
 import csv
 import os
 
@@ -25,17 +29,37 @@ app = Flask(__name__)
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "interactions.csv")
 
+# Common/regional name -> DDInter's canonical name. Add to this as you
+# hit more mismatches (see module docstring for how to find them).
+NAME_ALIASES = {
+    "aspirin": "acetylsalicylic acid",
+    "paracetamol": "acetaminophen",
+    "hyoscine": "scopolamine",
+}
+
+
+def normalize(name):
+    key = name.strip().lower()
+    return NAME_ALIASES.get(key, key)
+
 
 def load_interactions():
-    interactions = []
+    """
+    Index interactions by an unordered pair of normalized drug names,
+    so a lookup is O(1) regardless of dataset size, and so common-name
+    variants (Aspirin vs Acetylsalicylic acid) still match.
+    """
+    index = {}
     with open(DATA_FILE, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            interactions.append(row)
-    return interactions
+            key = frozenset({normalize(row["drug_a"]), normalize(row["drug_b"])})
+            index[key] = row
+    return index
 
 
 INTERACTIONS = load_interactions()
+print(f"Loaded {len(INTERACTIONS)} known drug interactions")
 
 
 @app.route("/health", methods=["GET"])
@@ -51,12 +75,11 @@ def check():
     if not drugs or len(drugs) < 2:
         return jsonify({"interactions": []})
 
-    drug_set = {d.lower() for d in drugs}
     found = []
-
-    for row in INTERACTIONS:
-        a, b = row["drug_a"].lower(), row["drug_b"].lower()
-        if a in drug_set and b in drug_set:
+    for drug_a, drug_b in combinations(drugs, 2):
+        key = frozenset({normalize(drug_a), normalize(drug_b)})
+        row = INTERACTIONS.get(key)
+        if row:
             found.append({
                 "pair": [row["drug_a"], row["drug_b"]],
                 "severity": row["severity"],
