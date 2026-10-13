@@ -391,6 +391,17 @@ const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-repo
       const res = await fetch(GATEWAY_URL, { method: "POST", body: formData });
       const data = await res.json();
 
+      
+document.dispatchEvent(new CustomEvent("safescript-report-checked", {
+  detail: {
+    summary: String(data.summary || ""),
+    matched_drugs: Array.isArray(data.matched_drugs)
+      ? data.matched_drugs
+      : []
+  }
+}));
+
+
       if (data.error) {
         alert("Something went wrong: " + data.error);
         return;
@@ -451,7 +462,9 @@ const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-repo
  
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
 
   const firebaseConfig = {
@@ -466,6 +479,32 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
   const firebaseApp = initializeApp(firebaseConfig);
   const auth = getAuth(firebaseApp);
   const db = getFirestore(firebaseApp);
+
+  
+document.addEventListener("safescript-report-checked", async (event) => {
+  const user = auth.currentUser;
+
+  if (!user) {
+    alert("Please log in before saving results.");
+    return;
+  }
+
+  try {
+    const report = event.detail;
+
+    await addDoc(collection(db, "users", user.uid, "savedItems"), {
+      summary: report.summary,
+      matched_drugs: report.matched_drugs,
+      createdAt: serverTimestamp()
+    });
+
+    console.log("Report results saved successfully.");
+  } catch (error) {
+    console.error("Could not save report results:", error);
+    alert("Results could not be saved. Please try again.");
+  }
+});
+
 
   
   document.getElementById("logoutBtn").addEventListener("click", async () => {
