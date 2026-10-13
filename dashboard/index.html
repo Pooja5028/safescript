@@ -441,10 +441,18 @@ const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-repo
 </script>
 
   
+
+<button id="logoutBtn" type="button" style="position:fixed;top:16px;right:16px;z-index:9999;padding:10px 18px;background:#dc2626;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;">
+  Logout
+</button>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
- import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+ 
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
   const firebaseConfig = {
     apiKey: "AIzaSyAAot5vbilUmH0bPMqcDwjKKOPOqpFVifI",
@@ -458,6 +466,18 @@ const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-repo
   const firebaseApp = initializeApp(firebaseConfig);
   const auth = getAuth(firebaseApp);
   const db = getFirestore(firebaseApp);
+
+  
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      window.location.replace("login.html");
+    } catch (error) {
+      alert("Logout failed. Please try again.");
+      console.error(error);
+    }
+  });
+
 
   
 onAuthStateChanged(auth, (user) => {
