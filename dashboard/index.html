@@ -440,5 +440,28 @@ const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-repo
   });
 </script>
 
+  
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAAot5vbilUmH0bPMqcDwjKKOPOqpFVifI",
+    authDomain: "safescript-1dd43.firebaseapp.com",
+    projectId: "safescript-1dd43",
+    storageBucket: "safescript-1dd43.firebasestorage.app",
+    messagingSenderId: "921803281648",
+    appId: "1:921803281648:web:bb0e56f7db0ab89cbd5e35"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const db = getFirestore(firebaseApp);
+
+  console.log("SafeScript Firebase initialized successfully.");
+</script>
+
+
 </body>
 </html>
