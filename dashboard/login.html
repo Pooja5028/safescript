@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeScript | Login</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 410px;
+      padding: 32px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    h1 { margin: 0 0 8px; text-align: center; color: #0f766e; }
+    .subtitle { text-align: center; color: #64748b; margin-bottom: 24px; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 22px; }
+
+    .tabs button {
+      flex: 1;
+      padding: 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .tabs button.active {
+      color: white;
+      background: #0f766e;
+      border-color: #0f766e;
+    }
+
+    label { display: block; margin: 14px 0 6px; font-size: 14px; }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .submit {
+      width: 100%;
+      margin-top: 22px;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      background: #0f766e;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled { opacity: 0.6; cursor: wait; }
+
+    #message {
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .back { display: block; margin-top: 20px; text-align: center; color: #0f766e; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>SafeScript</h1>
+    <p class="subtitle">Sign in to continue securely</p>
+
+    <div class="tabs">
+      <button type="button" id="loginTab" class="active">Login</button>
+      <button type="button" id="signupTab">Sign Up</button>
+    </div>
+
+    <form id="authForm">
+      <label for="email">Email address</label>
+      <input id="email" type="email" autocomplete="email"
+             placeholder="you@example.com" required>
+
+      <label for="password">Password</label>
+      <input id="password" type="password"
+             autocomplete="current-password"
+             placeholder="At least 6 characters" minlength="6" required>
+
+      <button class="submit" id="submitBtn" type="submit">Login</button>
+    </form>
+
+    <p id="message" role="status" aria-live="polite"></p>
+    <a class="back" href="index.html">Back to dashboard</a>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAot5vbilUmH0bPMqcDwjKKOPOqpFVifI",
+      authDomain: "safescript-1dd43.firebaseapp.com",
+      projectId: "safescript-1dd43",
+      storageBucket: "safescript-1dd43.firebasestorage.app",
+      messagingSenderId: "921803281648",
+      appId: "1:921803281648:web:bb0e56f7db0ab89cbd5e35"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    let mode = "login";
+
+    const form = document.getElementById("authForm");
+    const loginTab = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+    const submitBtn = document.getElementById("submitBtn");
+    const passwordInput = document.getElementById("password");
+    const message = document.getElementById("message");
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const signingUp = mode === "signup";
+
+      loginTab.classList.toggle("active", !signingUp);
+      signupTab.classList.toggle("active", signingUp);
+      submitBtn.textContent = signingUp ? "Create account" : "Login";
+      passwordInput.autocomplete = signingUp ? "new-password" : "current-password";
+      message.textContent = "";
+    }
+
+    loginTab.addEventListener("click", () => setMode("login"));
+    signupTab.addEventListener("click", () => setMode("signup"));
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        message.textContent = "You're already signed in. Opening SafeScript...";
+        window.location.replace("index.html");
+      }
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      submitBtn.disabled = true;
+      message.textContent = "Please wait...";
+
+      const email = document.getElementById("email").value.trim();
+      const password = passwordInput.value;
+
+      try {
+        if (mode === "signup") {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+        }
+
+        message.textContent = "Success! Opening SafeScript...";
+        window.location.replace("index.html");
+      } catch (error) {
+        const messages = {
+          "auth/email-already-in-use": "This email already has an account. Please log in.",
+          "auth/invalid-email": "Please enter a valid email address.",
+          "auth/weak-password": "Choose a stronger password with at least 6 characters.",
+          "auth/invalid-credential": "Email or password is incorrect. Please try again.",
+          "auth/too-many-requests": "Too many attempts. Please wait and try again.",
+          "auth/network-request-failed": "Network error. Check your internet connection."
+        };
+
+        message.textContent =
+          messages[error.code] || "Authentication failed. Please try again.";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
