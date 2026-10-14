@@ -548,15 +548,56 @@ deleteButton.style.cssText =
   "margin-top:12px;padding:8px 14px;border:1px solid #fecaca;border-radius:8px;background:#fff1f2;color:#b91c1c;cursor:pointer;font-weight:600;";
 
   
-deleteButton.addEventListener("click", async () => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this saved report?"
-  );
 
-  if (!confirmed) return;
+deleteButton.addEventListener("click", async () => {
+  const confirmed = document.createElement("div");
+  confirmed.style.cssText =
+    "margin-top:10px;padding:12px;border:1px solid #fecaca;border-radius:8px;background:#fff7f7;";
+
+  confirmed.textContent = "Are you sure you want to delete this report? ";
+
+  const yesButton = document.createElement("button");
+  yesButton.textContent = "Delete Report";
+  yesButton.type = "button";
+  yesButton.style.cssText =
+    "margin:6px;padding:7px 10px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.textContent = "Cancel";
+  cancelButton.type = "button";
+  cancelButton.style.cssText =
+    "margin:6px;padding:7px 10px;background:#e5e7eb;color:#111827;border:none;border-radius:6px;cursor:pointer;";
+
+  if (card.querySelector(".delete-confirmation")) return;
+  confirmed.className = "delete-confirmation";
+  confirmed.append(yesButton, cancelButton);
+  card.appendChild(confirmed);
 
   deleteButton.disabled = true;
-  deleteButton.textContent = "Deleting...";
+
+  cancelButton.addEventListener("click", () => {
+    confirmed.remove();
+    deleteButton.disabled = false;
+  });
+
+  yesButton.addEventListener("click", async () => {
+    yesButton.disabled = true;
+    yesButton.textContent = "Deleting...";
+
+    try {
+      await deleteDoc(
+        doc(db, "users", user.uid, "savedItems", reportDoc.id)
+      );
+      card.remove();
+    } catch (error) {
+      console.error("Could not delete saved report:", error);
+      alert("Could not delete this report. Please try again.");
+      confirmed.remove();
+      deleteButton.disabled = false;
+    }
+  });
+});
+
 
   try {
     await deleteDoc(
