@@ -581,6 +581,24 @@ onAuthStateChanged(auth, (user) => {
 
 
   console.log("SafeScript Firebase initialized successfully.");
+
+  
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleSavedReportsBtn = document.getElementById("toggleSavedReportsBtn");
+  const savedReportsList = document.getElementById("savedReportsList");
+  const savedReportsArrow = document.getElementById("savedReportsArrow");
+
+  toggleSavedReportsBtn.addEventListener("click", () => {
+    const isExpanded = toggleSavedReportsBtn.getAttribute("aria-expanded") === "true";
+
+    toggleSavedReportsBtn.setAttribute("aria-expanded", String(!isExpanded));
+    savedReportsList.hidden = isExpanded;
+    savedReportsArrow.textContent = isExpanded ? "⌄" : "⌃";
+  });
+});
+
+
 </script>
 
 
