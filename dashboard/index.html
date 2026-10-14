@@ -599,19 +599,7 @@ deleteButton.addEventListener("click", async () => {
 });
 
 
-  try {
-    await deleteDoc(
-      doc(db, "users", user.uid, "savedItems", reportDoc.id)
-    );
 
-    card.remove();
-  } catch (error) {
-    console.error("Could not delete saved report:", error);
-    alert("Could not delete this report. Please try again.");
-    deleteButton.disabled = false;
-    deleteButton.textContent = "Delete";
-  }
-});
 
 
 
