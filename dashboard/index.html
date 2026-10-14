@@ -462,8 +462,15 @@ document.dispatchEvent(new CustomEvent("safescript-report-checked", {
  
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-  
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 
@@ -505,6 +512,53 @@ document.addEventListener("safescript-report-checked", async (event) => {
   }
 });
 
+  async function loadSavedReports(user) {
+  const list = document.getElementById("savedReportsList");
+  list.textContent = "Loading saved reports...";
+
+  try {
+    const reportsRef = collection(db, "users", user.uid, "savedItems");
+    const reportsQuery = query(reportsRef, orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(reportsQuery);
+
+    list.innerHTML = "";
+
+    if (snapshot.empty) {
+      list.textContent = "No saved reports yet.";
+      return;
+    }
+
+    snapshot.forEach((reportDoc) => {
+      const report = reportDoc.data();
+      const card = document.createElement("div");
+      const heading = document.createElement("h3");
+      const summary = document.createElement("p");
+      const medicines = document.createElement("p");
+
+      heading.textContent = "Saved Report";
+      summary.textContent = report.summary || "No summary available.";
+      medicines.textContent = "Medicines: " +
+        (Array.isArray(report.matched_drugs)
+          ? report.matched_drugs.join(", ")
+          : "Not available");
+
+      card.style.cssText =
+        "padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:8px;";
+
+      card.append(heading, summary, medicines);
+      list.appendChild(card);
+    });
+  } catch (error) {
+    console.error("Error loading saved reports:", error);
+    list.textContent = "Could not load saved reports.";
+  }
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    loadSavedReports(user);
+  }
+});
 
   
   document.getElementById("logoutBtn").addEventListener("click", async () => {
