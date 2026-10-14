@@ -528,26 +528,43 @@ document.addEventListener("safescript-report-checked", async (event) => {
       return;
     }
 
-    snapshot.forEach((reportDoc) => {
-      const report = reportDoc.data();
-      const card = document.createElement("div");
-      const heading = document.createElement("h3");
-      const summary = document.createElement("p");
-      const medicines = document.createElement("p");
 
-      heading.textContent = "Saved Report";
-      summary.textContent = report.summary || "No summary available.";
-      medicines.textContent = "Medicines: " +
-        (Array.isArray(report.matched_drugs)
-          ? report.matched_drugs.join(", ")
-          : "Not available");
+snapshot.forEach((reportDoc) => {
+  const report = reportDoc.data();
+  const card = document.createElement("div");
+  const heading = document.createElement("h3");
+  const medicines = document.createElement("p");
+  const details = document.createElement("details");
+  const detailsButton = document.createElement("summary");
+  const fullSummary = document.createElement("p");
 
-      card.style.cssText =
-        "padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:8px;";
+  heading.textContent = "Saved Report";
+  heading.style.cssText = "margin:0 0 8px;font-size:16px;";
 
-      card.append(heading, summary, medicines);
-      list.appendChild(card);
-    });
+  medicines.textContent = "Medicines: " +
+    (Array.isArray(report.matched_drugs)
+      ? report.matched_drugs.join(", ")
+      : "Not available");
+
+  medicines.style.cssText = "margin:0 0 10px;color:#475569;";
+
+  detailsButton.textContent = "View Details";
+  detailsButton.style.cssText =
+    "cursor:pointer;color:#2563eb;font-size:14px;font-weight:600;";
+
+  fullSummary.textContent = report.summary || "No summary available.";
+  fullSummary.style.cssText =
+    "margin:10px 0 0;line-height:1.6;white-space:pre-wrap;";
+
+  details.append(detailsButton, fullSummary);
+
+  card.style.cssText =
+    "padding:14px 16px;margin:10px 0;border:1px solid #e2e8f0;border-radius:10px;background:#fff;";
+
+  card.append(heading, medicines, details);
+  list.appendChild(card);
+});
+
   } catch (error) {
     console.error("Error loading saved reports:", error);
     list.textContent = "Could not load saved reports.";
