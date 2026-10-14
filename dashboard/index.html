@@ -678,20 +678,20 @@ onAuthStateChanged(auth, (user) => {
 
   
 
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleSavedReportsBtn = document.getElementById("toggleSavedReportsBtn");
-  const savedReportsList = document.getElementById("savedReportsList");
-  const savedReportsArrow = document.getElementById("savedReportsArrow");
+const toggleSavedReportsBtn = document.getElementById("toggleSavedReportsBtn");
+const savedReportsList = document.getElementById("savedReportsList");
+const savedReportsArrow = document.getElementById("savedReportsArrow");
 
+if (toggleSavedReportsBtn && savedReportsList && savedReportsArrow) {
   toggleSavedReportsBtn.addEventListener("click", () => {
-    const isExpanded = toggleSavedReportsBtn.getAttribute("aria-expanded") === "true";
+    const isExpanded =
+      toggleSavedReportsBtn.getAttribute("aria-expanded") === "true";
 
     toggleSavedReportsBtn.setAttribute("aria-expanded", String(!isExpanded));
     savedReportsList.hidden = isExpanded;
     savedReportsArrow.textContent = isExpanded ? "⌄" : "⌃";
   });
-});
-
+}
 
 </script>
 
