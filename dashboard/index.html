@@ -576,11 +576,32 @@ h2, h3 {
   }
 }
 
+  .dashboard-layout {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar {
+  flex: 0 0 250px;
+}
+
+.main {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  padding: 38px 32px;
+  box-sizing: border-box;
+}
+  
 </style>
 </head>
 <body>
 
-<div class="sidebar">
+<div class="dashboard-layout">
+  <div class="sidebar">
+    
   <div class="brand">SafeScript</div>
   <div class="brand-tag">Report safety checker</div>
 
@@ -1094,6 +1115,7 @@ navItems.forEach(item => {
   });
 });
 </script>
-
+</div>
+</div>
 </body>
 </html>
