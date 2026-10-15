@@ -453,7 +453,11 @@ document.getElementById("findMedicineBtn").addEventListener("click", async funct
     }
 
     const data = await response.json();
-    const description = data.drug_info?.[medicineName];
+    const descriptions = data.drug_info || {};
+const key = Object.keys(descriptions).find(
+  name => name.toLowerCase() === medicineName.toLowerCase()
+);
+const description = key ? descriptions[key] : null;
 
     resultBox.textContent = description || "No information found for this medicine.";
   } catch (error) {
