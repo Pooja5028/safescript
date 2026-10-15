@@ -59,6 +59,25 @@ def service_url(host, path):
 def health():
     return jsonify({"status": "ok"})
 
+@app.route("/api/v1/drug-info", methods=["POST"])
+def drug_info_lookup():
+    data = request.get_json(silent=True) or {}
+    drugs = data.get("drugs", [])
+
+    if not isinstance(drugs, list) or not drugs:
+        return jsonify({"error": "Please provide a list of medicine names."}), 400
+
+    try:
+        response = requests.post(
+            service_url(DRUG_INFO_HOST, "/info"),
+            json={"drugs": drugs},
+            timeout=15,
+        )
+        response.raise_for_status()
+        return jsonify(response.json())
+    except requests.RequestException:
+        return jsonify({"error": "Medicine information service is unavailable."}), 502
+
 
 @app.route("/api/v1/process-report", methods=["POST"])
 def process_report():
