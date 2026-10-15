@@ -411,6 +411,20 @@ h2, h3 {
     </div>
   </div>
 
+    <div class="upload-panel" id="medicineFinder">
+    <h2>Medicine Information Finder</h2>
+    <p>Enter a medicine name to find information about it.</p>
+    <div class="upload-row">
+      <div class="file-input-wrap">
+        <label for="medicineName">Medicine name</label>
+        <input type="text" id="medicineName" placeholder="e.g. Aspirin">
+      </div>
+      <button id="findMedicineBtn" type="button">Find medicine</button>
+    </div>
+    <div id="medicineFinderResult" aria-live="polite"></div>
+  </div>
+
+  
   <script>
 const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-report";
   </script>
