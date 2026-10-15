@@ -10,6 +10,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SafeScript — Medical Report OCR and Drug Interaction Checker</title>
+
+  
 <style>
 :root {
   --ink: #17324D;
@@ -378,6 +380,78 @@ h2, h3 {
   letter-spacing: -0.3px;
 }
 
+  /* Medicine Finder layout */
+#medicineSection {
+  width: 100%;
+  max-width: 900px;
+}
+
+#medicineSection .page-title {
+  margin-bottom: 12px;
+}
+
+#medicineSection > p {
+  color: #71809a;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+#medicineSection .upload-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+#medicineSection .file-input-wrap {
+  flex: 1;
+  min-width: 220px;
+}
+
+#medicineSection input[type="text"] {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #d8e0f0;
+  border-radius: 12px;
+  background: #fff;
+  color: #243b63;
+  font-size: 15px;
+  outline: none;
+}
+
+#medicineSection input[type="text"]:focus {
+  border-color: #5279ee;
+  box-shadow: 0 0 0 3px rgba(82, 121, 238, 0.12);
+}
+
+#medicineSection #findMedicineBtn {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 12px;
+  background: #2864ed;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#medicineSection #findMedicineBtn:hover {
+  background: #174fcf;
+}
+
+#medicineSection #medicineFinderResult {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f4f6ff;
+  color: #334766;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+#medicineSection #medicineFinderResult:empty {
+  display: none;
+}
   
 </style>
 </head>
@@ -417,7 +491,7 @@ h2, h3 {
 
 <section id="medicineSection" style="display: none;">
   <h1 class="page-title">Medicine Information Finder</h1>
-    <h2>Medicine Information Finder</h2>
+   
     <p>Enter a medicine name to find information about it.</p>
     <div class="upload-row">
       <div class="file-input-wrap">
