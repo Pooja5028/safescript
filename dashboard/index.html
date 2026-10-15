@@ -425,10 +425,42 @@ h2, h3 {
   </div>
 
   
-  <script>
+   <script>
 const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-report";
-  </script>
 
+const MEDICINE_INFO_URL = "https://safescript-drug-info.onrender.com/info";
+
+document.getElementById("findMedicineBtn").addEventListener("click", async function () {
+  const medicineName = document.getElementById("medicineName").value.trim();
+  const resultBox = document.getElementById("medicineFinderResult");
+
+  if (!medicineName) {
+    resultBox.textContent = "Please enter a medicine name.";
+    return;
+  }
+
+  resultBox.textContent = "Searching for medicine information...";
+
+  try {
+    const response = await fetch(MEDICINE_INFO_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ drugs: [medicineName] })
+    });
+
+    if (!response.ok) {
+      throw new Error("Medicine lookup failed.");
+    }
+
+    const data = await response.json();
+    const description = data.drug_info?.[medicineName];
+
+    resultBox.textContent = description || "No information found for this medicine.";
+  } catch (error) {
+    resultBox.textContent = "Could not retrieve information. Please try again.";
+  }
+});
+  </script>
   <div id="resultBox">
     <div class="results-row">
       <div class="panel">
