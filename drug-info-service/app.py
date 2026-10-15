@@ -1,7 +1,3 @@
-"""
-SafeScript Drug Information Service
-Retrieves short medicine-use descriptions from the openFDA drug label API.
-"""
 
 import os
 import re
@@ -16,7 +12,7 @@ _cache = {}
 
 def clean_text(value):
     if isinstance(value, list):
-        value = value[0] if value else ""
+        value = " ".join(str(item) for item in value if item)
     if not isinstance(value, str):
         return ""
 
@@ -24,11 +20,12 @@ def clean_text(value):
     if not value:
         return ""
 
-    # Keep the description short for the dashboard.
     sentence = re.split(r"(?<=[.!?])\s+", value, maxsplit=1)[0]
     sentence = sentence[:240].strip()
+
     if sentence and sentence[-1] not in ".!?":
         sentence += "..."
+
     return sentence
 
 def fetch_plain_description(drug_name):
@@ -36,12 +33,16 @@ def fetch_plain_description(drug_name):
     if not name:
         return FALLBACK_TEXT
 
-    if name.lower() in _cache:
-        return _cache[name.lower()]
+    cache_key = name.lower()
+    if cache_key in _cache:
+        return _cache[cache_key]
 
-    # Try multiple FDA fields because a detected name may be a
-    # generic name, a brand name, or an active ingredient.
-    search_fields = ["generic_name", "brand_name", "substance_name"]
+    search_fields = [
+        "active_ingredient",
+        "openfda.generic_name",
+        "openfda.brand_name",
+        "openfda.substance_name",
+    ]
 
     try:
         for field in search_fields:
@@ -58,17 +59,18 @@ def fetch_plain_description(drug_name):
                 continue
 
             results = response.json().get("results", [])
+
             for label in results:
                 for key in ("indications_and_usage", "purpose"):
                     description = clean_text(label.get(key))
                     if description:
-                        _cache[name.lower()] = description
+                        _cache[cache_key] = description
                         return description
 
-    except (requests.RequestException, ValueError):
-        pass
+    except (requests.RequestException, ValueError) as error:
+        app.logger.warning("Medicine lookup failed for %s: %s", name, error)
 
-    _cache[name.lower()] = FALLBACK_TEXT
+    _cache[cache_key] = FALLBACK_TEXT
     return FALLBACK_TEXT
 
 @app.route("/health", methods=["GET"])
@@ -84,6 +86,7 @@ def info():
         return jsonify({"error": "'drugs' must be a list"}), 400
 
     drug_info = {}
+
     for drug in drugs:
         if isinstance(drug, str):
             drug_info[drug] = fetch_plain_description(drug)
