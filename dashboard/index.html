@@ -486,7 +486,94 @@ h2, h3 {
 #medicineSection #medicineFinderResult:empty {
   display: none;
 }
-  
+
+
+ 
+/* Shared layout for both dashboard sections */
+#reportSection,
+#medicineSection {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Report page: wide upload card and result columns */
+#reportSection .upload-panel {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+#reportSection .results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  width: 100%;
+}
+
+/* Medicine Finder: match the report page's spacing */
+#medicineSection {
+  padding: 12px 28px 32px 12px;
+}
+
+#medicineSection .page-title {
+  font-size: 32px;
+  margin-bottom: 12px;
+  max-width: none;
+}
+
+#medicineSection > p {
+  color: #71809a;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  max-width: 700px;
+}
+
+#medicineSection .upload-panel {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #dfe7f5;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 24px rgba(40, 70, 120, 0.05);
+}
+
+#medicineSection .upload-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  max-width: 760px;
+  flex-wrap: wrap;
+}
+
+#medicineSection .file-input-wrap {
+  flex: 1;
+  min-width: 220px;
+}
+
+#medicineSection input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#medicineSection #findMedicineBtn {
+  white-space: nowrap;
+  min-height: 48px;
+}
+
+@media (max-width: 900px) {
+  #reportSection .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #medicineSection {
+    padding: 12px 0 24px;
+  }
+}
+
 </style>
 </head>
 <body>
