@@ -387,7 +387,8 @@ h2, h3 {
   <div class="brand">SafeScript</div>
   <div class="brand-tag">Report safety checker</div>
 
-  <div class="nav-item"><span class="nav-dot"></span> Check a report</div>
+   <div class="nav-item active" data-section="report"><span class="nav-dot"></span> Check a report</div>
+  <div class="nav-item" data-section="medicine"><span class="nav-dot"></span> Medicine Information Finder</div>
 
   <div class="sidebar-footer">
     Scoped to printed and typed reports. Handwriting recognition is not supported.
@@ -395,6 +396,7 @@ h2, h3 {
 </div>
 
 <div class="main">
+  <section id="reportSection">
   <h1 class="page-title">Check a report</h1>
   <p class="page-subtitle">Upload a printed medical report or prescription to see what's in it and whether anything conflicts.</p>
 
@@ -411,7 +413,10 @@ h2, h3 {
     </div>
   </div>
 
-    <div class="upload-panel" id="medicineFinder">
+    </section>
+
+<section id="medicineSection" style="display: none;">
+  <h1 class="page-title">Medicine Information Finder</h1>
     <h2>Medicine Information Finder</h2>
     <p>Enter a medicine name to find information about it.</p>
     <div class="upload-row">
@@ -421,11 +426,11 @@ h2, h3 {
       </div>
       <button id="findMedicineBtn" type="button">Find medicine</button>
     </div>
-    <div id="medicineFinderResult" aria-live="polite"></div>
+       <div id="medicineFinderResult" aria-live="polite"></div>
   </div>
+</section>
 
-  
-   <script>
+<script>
 const GATEWAY_URL = "https://safescript-gateway.onrender.com/api/v1/process-report";
 
 const MEDICINE_INFO_URL = "https://safescript-gateway.onrender.com/api/v1/drug-info";
@@ -483,8 +488,9 @@ const description = key ? descriptions[key] : null;
       <pre id="summaryText"></pre>
     </div>
 
-    <div class="timings-note" id="timingsText"></div>
+       <div class="timings-note" id="timingsText"></div>
   </div>
+  </section>
 
   <p class="disclaimer">
     This tool is for informational purposes only and is not a substitute for
@@ -870,6 +876,27 @@ if (toggleSavedReportsBtn && savedReportsList && savedReportsArrow) {
   </div>
 </section>
 
+
+  <script>
+const navItems = document.querySelectorAll(".sidebar .nav-item");
+const reportSection = document.getElementById("reportSection");
+const medicineSection = document.getElementById("medicineSection");
+
+navItems.forEach(item => {
+  item.addEventListener("click", () => {
+    const section = item.dataset.section;
+
+    reportSection.style.display = section === "report" ? "" : "none";
+    medicineSection.style.display = section === "medicine" ? "" : "none";
+
+    navItems.forEach(nav => nav.classList.remove("active"));
+    item.classList.add("active");
+
+    document.querySelector(".main").scrollTop = 0;
+    window.scrollTo(0, 0);
+  });
+});
+</script>
 
 </body>
 </html>
