@@ -576,8 +576,9 @@ h2, h3 {
   }
 }
 
-  .dashboard-layout {
-  display: flex;
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
   align-items: stretch;
   width: 100%;
   min-height: 100vh;
