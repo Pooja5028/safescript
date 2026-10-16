@@ -631,12 +631,34 @@ h2, h3 {
     </div>
   </div>
 
-    </section>
+  <div id="resultBox">
+    <div class="results-row">
+      <div class="panel">
+        <h2>Medicines identified</h2>
+        <div id="drugList"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Interaction check</h2>
+        <div id="interactionList"></div>
+      </div>
+    </div>
+
+    <div class="summary-panel">
+      <h2>Summary</h2>
+      <pre id="summaryText"></pre>
+    </div>
+
+       <div class="timings-note" id="timingsText"></div>
+  </div>
+
+  </section>
 
 <section id="medicineSection" style="display: none;">
   <h1 class="page-title">Medicine Information Finder</h1>
    
     <p>Enter a medicine name to find information about it.</p>
+    <div class="upload-panel">
     <div class="upload-row">
       <div class="file-input-wrap">
         <label for="medicineName">Medicine name</label>
@@ -688,27 +710,67 @@ const description = key ? descriptions[key] : null;
   }
 });
   </script>
-  <div id="resultBox">
-    <div class="results-row">
-      <div class="panel">
-        <h2>Medicines identified</h2>
-        <div id="drugList"></div>
-      </div>
-
-      <div class="panel">
-        <h2>Interaction check</h2>
-        <div id="interactionList"></div>
-      </div>
-    </div>
-
-    <div class="summary-panel">
-      <h2>Summary</h2>
-      <pre id="summaryText"></pre>
-    </div>
-
-       <div class="timings-note" id="timingsText"></div>
-  </div>
   </section>
+
+ <section id="savedReportsSection" style="
+ margin-top: 56px;
+  padding: 22px 24px;
+  border: 1px solid #e0e6f5;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(55, 80, 130, 0.05);
+">
+  <button
+    id="toggleSavedReportsBtn"
+    type="button"
+    aria-expanded="false"
+    style="
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: #30466f;
+    "
+  >
+    <span>Previously Checked Reports</span>
+    <span id="savedReportsArrow" style="
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: #eef1ff;
+      color: #687fe0;
+      font-size: 19px;
+      font-weight: 500;
+    ">⌄</span>
+  </button>
+
+  <p style="
+    margin: 10px 0 0;
+    color: #7a879e;
+    font-size: 13px;
+    line-height: 1.6;
+  ">
+    View your previously saved report results.
+  </p>
+
+  <div id="savedReportsList" hidden style="margin-top: 16px;">
+    <p>Loading saved reports...</p>
+  </div>
+</section>
 
   <p class="disclaimer">
     This tool is for informational purposes only and is not a substitute for
@@ -1034,65 +1096,7 @@ if (toggleSavedReportsBtn && savedReportsList && savedReportsArrow) {
 
 </script>
 
- <section id="savedReportsSection" style="
- margin-top: 56px;
-  padding: 22px 24px;
-  border: 1px solid #e0e6f5;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 6px 20px rgba(55, 80, 130, 0.05);
-">
-  <button
-    id="toggleSavedReportsBtn"
-    type="button"
-    aria-expanded="false"
-    style="
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      padding: 0;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      text-align: left;
-      font-family: inherit;
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: -0.3px;
-      color: #30466f;
-    "
-  >
-    <span>Previously Checked Reports</span>
-    <span id="savedReportsArrow" style="
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      flex-shrink: 0;
-      border-radius: 10px;
-      background: #eef1ff;
-      color: #687fe0;
-      font-size: 19px;
-      font-weight: 500;
-    ">⌄</span>
-  </button>
 
-  <p style="
-    margin: 10px 0 0;
-    color: #7a879e;
-    font-size: 13px;
-    line-height: 1.6;
-  ">
-    View your previously saved report results.
-  </p>
-
-  <div id="savedReportsList" hidden style="margin-top: 16px;">
-    <p>Loading saved reports...</p>
-  </div>
-</section>
 
 
   <script>
@@ -1115,7 +1119,6 @@ navItems.forEach(item => {
   });
 });
 </script>
-</div>
 </div>
 </body>
 </html>
